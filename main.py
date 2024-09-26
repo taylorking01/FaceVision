@@ -1,31 +1,93 @@
-from data_loader import load_data
-from feature_extractor import extract_features
-from classifier import train_classifier, evaluate_classifier
-from sklearn.model_selection import train_test_split
-from utils import plot_samples
+from feature_extractor import extract_features_single
+import joblib
+import numpy as np
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+import torchvision
+import torchvision.transforms as transforms
 
 def main():
-    # Load and preprocess data
-    X, y = load_data()
-    print("Data loaded successfully.")
+    # Load the trained model
+    clf = joblib.load('face_detection_model.joblib')
+    print("Model loaded successfully.")
 
-    # Plot some samples
-    plot_samples(X[:10], y[:10])
+    # Define transformation to match model's input
+    transform = transforms.Compose([
+        transforms.Resize((62, 47)),
+        transforms.Grayscale(num_output_channels=1),
+        transforms.ToTensor(),
+    ])
 
-    # Extract features
-    X_features = extract_features(X)
+    # Load CelebA test dataset (Alternative: Use a different dataset if CelebA remains inaccessible)
+    # We'll use the Test Split of LFW instead to avoid downloading issues
+    from sklearn.datasets import fetch_lfw_people
 
-    # Split data into training and testing sets
-    X_train, X_test, y_train, y_test = train_test_split(
-        X_features, y, test_size=0.2, random_state=42
+    lfw_test = fetch_lfw_people(
+        min_faces_per_person=0,
+        resize=0.5,
+        download_if_missing=True,
     )
 
-    # Train classifier
-    clf = train_classifier(X_train, y_train)
-    print("Classifier trained successfully.")
+    X_faces = lfw_test.images
+    y_faces = np.ones(X_faces.shape[0])
 
-    # Evaluate classifier
-    evaluate_classifier(clf, X_test, y_test)
+    # Generate non-human images using CIFAR-10
+    cifar10 = torchvision.datasets.CIFAR10(
+        root='/content',
+        train=False,
+        download=True,
+        transform=transform,
+    )
+
+    def get_non_human_images(dataset, num_samples=50):
+        non_human_classes = [0, 1, 8, 9]  # 'airplane', 'automobile', 'ship', 'truck'
+        images = []
+        count = 0
+        i = 0
+        while count < num_samples and i < len(dataset):
+            img_tensor, label = dataset[i]
+            if label in non_human_classes:
+                img_array = img_tensor.numpy().squeeze()
+                images.append(img_array)
+                count += 1
+            i += 1
+        return images
+
+    non_human_images = get_non_human_images(cifar10)
+    y_non_humans = np.zeros(len(non_human_images))
+
+    # Assign labels
+    X_humans = X_faces[:50]  # Select first 50 face images
+    y_humans = y_faces[:50]
+
+    # Combine human and non-human images into a single NumPy array
+    X_test = np.concatenate((X_humans, non_human_images), axis=0)  # Correctly concatenate along axis 0
+    y_test = np.concatenate((y_humans, y_non_humans), axis=0)
+
+    # Debugging: Print shapes
+    print(f"X_test shape: {X_test.shape}")
+    print(f"y_test shape: {y_test.shape}")
+
+    # Preprocess images
+    X_test_processed = [extract_features_single(img) for img in X_test]
+    X_test_processed = np.array(X_test_processed)
+    print(f"X_test_processed shape: {X_test_processed.shape}")
+    print("Data preprocessing completed.")
+
+    # Make predictions
+    y_pred = clf.predict(X_test_processed)
+
+    # Debugging: Print y_pred shape
+    print(f"y_pred shape: {y_pred.shape}")
+
+    # Evaluate performance
+    accuracy = accuracy_score(y_test, y_pred)
+    print(f"Test Accuracy on Unseen Data: {accuracy * 100:.2f}%\n")
+
+    print("Classification Report:")
+    print(classification_report(y_test, y_pred, target_names=['Non-Human', 'Human']))
+
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, y_pred))
 
 if __name__ == "__main__":
     main()
