@@ -1,9 +1,15 @@
-# Ignore Python cache files
+# Ignore environment variables
+*.env
+*.pat
+
+# Ignore Python cache and logs
 __pycache__/
 *.pyc
+*.log
 
-# Ignore environment variables file (if any)
-.env
+# Ignore system files
+.DS_Store
 
-# Ignore any notebook files (if you don't want to commit them)
-*.ipynb
+# Ignore virtual environments
+venv/
+.env/
