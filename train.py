@@ -13,7 +13,7 @@ def train_model():
     # Plot some samples
     plot_samples(X[:10], y[:10])
 
-    # Extract features
+    # Extract HOG features
     X_features = extract_features(X)
 
     # Split data into training and testing sets

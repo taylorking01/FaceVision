@@ -17,8 +17,8 @@ def main():
         transforms.ToTensor(),
     ])
 
-    # Load CelebA test dataset (Alternative: Use a different dataset if CelebA remains inaccessible)
-    # We'll use the Test Split of LFW instead to avoid downloading issues
+    # Load test data
+    # For demonstration, we'll use the same dataset as before
     from sklearn.datasets import fetch_lfw_people
 
     lfw_test = fetch_lfw_people(
@@ -60,14 +60,14 @@ def main():
     y_humans = y_faces[:50]
 
     # Combine human and non-human images into a single NumPy array
-    X_test = np.concatenate((X_humans, non_human_images), axis=0)  # Correctly concatenate along axis 0
+    X_test = np.concatenate((X_humans, non_human_images), axis=0)
     y_test = np.concatenate((y_humans, y_non_humans), axis=0)
 
     # Debugging: Print shapes
     print(f"X_test shape: {X_test.shape}")
     print(f"y_test shape: {y_test.shape}")
 
-    # Preprocess images
+    # Preprocess images and extract HOG features
     X_test_processed = [extract_features_single(img) for img in X_test]
     X_test_processed = np.array(X_test_processed)
     print(f"X_test_processed shape: {X_test_processed.shape}")
@@ -75,9 +75,6 @@ def main():
 
     # Make predictions
     y_pred = clf.predict(X_test_processed)
-
-    # Debugging: Print y_pred shape
-    print(f"y_pred shape: {y_pred.shape}")
 
     # Evaluate performance
     accuracy = accuracy_score(y_test, y_pred)
