@@ -14,7 +14,8 @@ The project is organized into several Python scripts, each responsible for a spe
 - **`feature_extractor.py`**: Extracts features from images to be used by the classifier.
 - **`classifier.py`**: Contains functions to train the machine learning classifier.
 - **`train.py`**: Orchestrates the training process, including data loading, feature extraction, and model training.
-- **`main.py`**: Loads the trained model and evaluates its performance on unseen test data.
+- **`main.py`**: Opens the webcam to run real-time face detection using the trained model.
+- **`evaluate_model.py`**: Loads the trained model and evaluates its performance on unseen test data.
 - **`utils.py`**: Provides utility functions, such as plotting sample images.
 
 ---
@@ -23,13 +24,11 @@ The project is organized into several Python scripts, each responsible for a spe
 
 ### **Feature Extraction**
 
-The feature extraction process involves transforming images into a format suitable for machine learning algorithms. Initially, images are flattened into one-dimensional arrays:
+The feature extraction process involves transforming images into a format suitable for machine learning algorithms. Initially, images are processed using Histogram of Oriented Gradients (HOG), which captures essential features such as edges and gradients for face detection:
 
 \[
-	ext{Flattened Image} = 	ext{reshape}(	ext{Image Matrix}, (1, 	ext{height} 	imes 	ext{width}))
+	ext{HOG Features} = 	ext{compute\_hog}(	ext{Image})
 \]
-
-This simple approach may not capture the complex features necessary for distinguishing faces from non-faces.
 
 ### **Classification Algorithm**
 
@@ -66,7 +65,7 @@ ight)
 ### **Training Data**
 
 - **Face Images**: Sourced from the Labeled Faces in the Wild (LFW) dataset, resized to \( 62 	imes 47 \) pixels.
-- **Non-Face Images**: Generated as random noise images matching the dimensions of the face images.
+- **Non-Face Images**: Sourced from the CIFAR-100 dataset, providing varied non-face objects such as animals and vehicles.
 
 ### **Test Data**
 
@@ -80,7 +79,7 @@ ight)
 The training process involves several steps:
 
 1. **Data Loading**: Face and non-face images are loaded and combined into a single dataset.
-2. **Feature Extraction**: Images are flattened to create feature vectors.
+2. **Feature Extraction**: Histogram of Oriented Gradients (HOG) features are extracted from images.
 3. **Data Splitting**: The dataset is split into training and testing sets using an 80/20 split.
 4. **Model Training**: An AdaBoost classifier with decision stumps is trained on the training set.
 5. **Model Saving**: The trained model is saved to `face_detection_model.joblib` for later use.
@@ -89,135 +88,71 @@ The training process involves several steps:
 
 ## **Performance Evaluation**
 
-When evaluated on unseen test data, the model's performance was suboptimal:
+### Initial Model:
+- **Accuracy**: 50.00% (indicating poor performance on the unseen data).
 
-- **Accuracy**: 50.00%
-- **Classification Report**:
-
-  ```
-                precision    recall  f1-score   support
-
-     Non-Human       0.50      1.00      0.67        50
-         Human       0.00      0.00      0.00        50
-
-      accuracy                           0.50       100
-     macro avg       0.25      0.50      0.33       100
-  weighted avg       0.25      0.50      0.33       100
-  ```
-
-- **Confusion Matrix**:
-
-  \[
-  egin{bmatrix}
-  50 & 0 \
-  50 & 0 \
-  \end{bmatrix}
-  \]
-
-The model predicts all samples as 'Non-Human', indicating that it fails to generalize to new human face images.
+### Improved Model:
+- **Accuracy**: 94.00% (after implementing HOG feature extraction and using a more diverse dataset).
 
 ---
 
-## **Discussion**
+## **Current Limitations**
 
-The poor performance suggests that the current model and feature extraction method are insufficient for effective face detection. Possible reasons include:
-
-- **Inadequate Feature Representation**: Flattening images may not capture the necessary features for distinguishing faces.
-- **Model Complexity**: The AdaBoost classifier with decision stumps may be too simplistic for this task.
-- **Data Imbalance**: The training data may not be adequately balanced or diverse.
+- The model shows bias toward detecting faces facing a specific direction (e.g., faces facing right are more likely to be detected, while faces looking straight or left are often missed).
+- More diverse training data with varying face orientations, lighting, and background conditions are needed to improve generalization.
 
 ---
 
 ## **Future Improvements**
 
-To enhance the model's performance, the following steps are proposed:
-
-### **1. Advanced Feature Extraction**
-
-Implement Histogram of Oriented Gradients (HOG) to capture edge and shape information:
-
-\[
-	ext{HOG Features} = 	ext{compute\_hog}(	ext{Image})
-\]
+### **1. Additional Datasets**
+- Train the model on a larger dataset that includes more face orientations (left, right, straight), varied lighting conditions, and different backgrounds.
 
 ### **2. Use More Complex Classifiers**
+- Consider switching to classifiers that can capture non-linear relationships:
+  - **Support Vector Machines (SVM)**
+  - **Random Forests**
+  - **Convolutional Neural Networks (CNNs)**
 
-Experiment with classifiers that can capture non-linear relationships:
+### **3. Data Augmentation**
+- Augment the training dataset by rotating, flipping, and scaling the images to create more variation.
 
-- **Support Vector Machines (SVM)**
-- **Random Forests**
-- **Gradient Boosting Machines**
-
-### **3. Hyperparameter Tuning**
-
-Optimize model parameters using techniques like Grid Search or Random Search to find the best settings for:
-
-- **Number of Estimators**
-- **Learning Rate**
-- **Max Depth of Trees**
-
-### **4. Increase Training Data**
-
-- **Data Augmentation**: Rotate, flip, or scale images to create more training samples.
-- **Additional Datasets**: Incorporate other face datasets to improve diversity.
-
-### **5. Implement Deep Learning Models**
-
-Consider using Convolutional Neural Networks (CNNs) for feature extraction and classification, which are well-suited for image data.
+### **4. Hyperparameter Tuning**
+- Fine-tune the model’s parameters to optimize performance.
 
 ---
 
 ## **Conclusion**
 
-The FaceVision project serves as a foundation for understanding face detection using machine learning. While the initial model did not perform as expected on unseen data, it provides valuable insights into areas requiring improvement. By enhancing feature extraction methods, utilizing more sophisticated classifiers, and expanding the dataset, future iterations of the project can achieve better performance.
+The FaceVision project serves as a foundation for understanding face detection using machine learning. By enhancing feature extraction methods, utilizing more sophisticated classifiers, and expanding the dataset, future iterations of the project can achieve better performance.
 
 ---
 
 ## **How to Run the Project**
 
-To get started with FaceVision, follow these steps:
-
 ### **1. Clone the Repository**
-
-Start by cloning the FaceVision repository from GitHub to your local machine or cloud environment (such as Google Colab):
 
 ```bash
 git clone https://github.com/your_username/FaceVision.git
 ```
 
-### **2. Navigate to the Project Directory**
-
-Once cloned, navigate into the project directory:
-
-```bash
-cd FaceVision
-```
-
-### **3. Install the Dependencies**
-
-Before running the project, you need to install the required dependencies. These are listed in the `requirements.txt` file. To install them, run the following command:
+### **2. Install the Dependencies**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### **4. Train the Model**
-
-To train the model, execute the `train.py` script. This will load the dataset, extract features, train the classifier, and save the trained model to a file:
+### **3. Train the Model**
 
 ```bash
 python train.py
 ```
 
-### **5. Test the Model on Unseen Data**
-
-Once the model is trained, you can evaluate its performance on unseen test data using the `main.py` script:
+### **4. Evaluate the Model**
 
 ```bash
-python main.py
+python evaluate_model.py
 ```
-
-This script will load the saved model, preprocess the test data (human and non-human images), and output the model's performance.
 
 ---
 
@@ -230,15 +165,3 @@ This script will load the saved model, preprocess the test data (human and non-h
 - **Matplotlib**
 - **Joblib**
 - **Torchvision**
-
-To install these dependencies, simply run:
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## **Contact**
-
-For any questions or suggestions, feel free to contact [your_email@example.com](mailto:your_email@example.com).
