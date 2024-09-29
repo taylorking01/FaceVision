@@ -1,15 +1,15 @@
-# Ignore environment variables
-*.env
-*.pat
+# Ignore large data files
+data/cifar-100-python/*
+data/test_32x32.mat
 
-# Ignore Python cache and logs
-__pycache__/
-*.pyc
+# Ignore model files
+*.joblib
+*.h5
+*.ckpt
+
+# Ignore other large or temporary files
 *.log
-
-# Ignore system files
-.DS_Store
-
-# Ignore virtual environments
-venv/
-.env/
+*.tar.gz
+*.zip
+__pycache__/
+.ipynb_checkpoints/
