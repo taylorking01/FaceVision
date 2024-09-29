@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 import joblib
 
 def train_model():
-    # Load and preprocess data
+    # Load and preprocess data (with augmentation applied)
     X, y = load_data()
     print("Data loaded successfully.")
 

@@ -4,11 +4,15 @@ import torchvision.transforms as transforms
 from sklearn.datasets import fetch_lfw_people
 
 def load_data():
-    # Define transformations to resize images and convert to grayscale
+    # Define data augmentation techniques for face and non-face images
     transform = transforms.Compose([
-        transforms.Resize((62, 47)),
-        transforms.Grayscale(num_output_channels=1),
-        transforms.ToTensor(),
+        transforms.Resize((62, 47)),  # Resize to match model input size
+        transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
+        transforms.RandomHorizontalFlip(p=0.5),  # Randomly flip images horizontally
+        transforms.RandomRotation(degrees=30),  # Randomly rotate images
+        transforms.RandomResizedCrop(size=(62, 47), scale=(0.8, 1.0)),  # Random scaling
+        transforms.ColorJitter(brightness=0.5, contrast=0.5),  # Adjust brightness and contrast
+        transforms.ToTensor()  # Convert to tensor
     ])
 
     # Load CIFAR-100 dataset for non-face images
