@@ -12,8 +12,8 @@ The project is organized into several Python scripts, each responsible for a spe
 
 - **`data_loader.py`**: Loads and preprocesses the dataset, including both face images and non-face images.
 - **`feature_extractor.py`**: Extracts features from images to be used by the classifier.
-- **`classifier.py`**: Contains functions to train the machine learning classifier.
-- **`train.py`**: Orchestrates the training process, including data loading, feature extraction, and model training, while also tracking start time, end time, and total training time.
+- **`classifier.py`**: Contains functions to train the machine learning classifier, now using Support Vector Machines (SVM).
+- **`train.py`**: Orchestrates the training process, including data loading, feature extraction, and model training with start and finish times.
 - **`main.py`**: Opens the webcam to run real-time face detection using the trained model.
 - **`evaluate_model.py`**: Loads the trained model and evaluates its performance on unseen test data.
 - **`utils.py`**: Provides utility functions, such as plotting sample images.
@@ -24,31 +24,15 @@ The project is organized into several Python scripts, each responsible for a spe
 
 ### **Feature Extraction**
 
-The feature extraction process involves transforming images into a format suitable for machine learning algorithms. Initially, images are processed using Histogram of Oriented Gradients (HOG), which captures essential features such as edges and gradients for face detection:
+The feature extraction process involves transforming images into a format suitable for machine learning algorithms. Currently, Histogram of Oriented Gradients (HOG) is used to capture essential features such as edges and gradients for face detection.
 
-\[	ext{HOG Features} = 	ext{compute\_hog}(	ext{Image})\]
+### **Classification Algorithm: SVM**
 
-### **Classification Algorithm**
+We have implemented a Support Vector Machine (SVM) using a Radial Basis Function (RBF) kernel.
 
-The classifier used is an AdaBoost ensemble method with decision stumps (trees with a maximum depth of 1) as weak learners. The AdaBoost algorithm combines multiple weak learners to form a strong classifier.
-
-- **AdaBoost Algorithm**:
-
-  For \( m = 1 \) to \( M \):
-  
-  1. Train a weak learner \( h_m(x) \) using weighted training data.
-  2. Compute the weak learner's weight \( lpha_m \):
-     \[lpha_m = rac{1}{2} \ln\left(rac{1 - \epsilon_m}{\epsilon_m}
-ight)\]
-     where \( \epsilon_m \) is the weighted error rate.
-  3. Update the data weights \( w_i \) for each training sample:
-     \[w_i \leftarrow w_i \exp\left(-lpha_m y_i h_m(x_i)
-ight)\]
-  4. Normalize the weights.
-
-- **Final Strong Classifier**:
-  \[H(x) = 	ext{sign}\left(\sum_{m=1}^{M} lpha_m h_m(x)
-ight)\]
+- **Kernel**: RBF is used as it performs well in most image recognition tasks by creating non-linear decision boundaries.
+- **C (Regularization)**: Controls the trade-off between classifying training points correctly and having a smooth decision boundary.
+- **Gamma**: Controls the influence of individual data points, currently set to `'scale'`, which is recommended for SVM in scikit-learn.
 
 ---
 
@@ -71,53 +55,70 @@ ight)\]
 The training process involves several steps:
 
 1. **Data Loading**: Face and non-face images are loaded and combined into a single dataset.
-2. **Data Augmentation**: Data augmentation techniques such as horizontal flipping, rotation, scaling, and adjusting brightness/contrast are applied to improve generalization.
+2. **Data Augmentation**: Data augmentation techniques such as horizontal flipping, rotation, scaling, and adjusting brightness/contrast are applied.
 3. **Feature Extraction**: Histogram of Oriented Gradients (HOG) features are extracted from images.
 4. **Data Splitting**: The dataset is split into training and testing sets using an 80/20 split.
-5. **Model Training**: An AdaBoost classifier with decision stumps is trained on the training set.
-6. **Model Saving**: The trained model is saved to `face_detection_model.joblib` for later use.
+5. **Model Training**: A Support Vector Machine (SVM) classifier is trained on the training set.
+6. **Model Saving**: The trained model is saved to `face_detection_model_svm.joblib`.
 
 ---
 
 ## **Performance Evaluation**
 
-### Initial Model:
-- **Accuracy**: 50.00% (indicating poor performance on the unseen data).
+### SVM Model Results:
+- **Accuracy on Unseen Data**: 100.00%
+- **Confusion Matrix**:
 
-### Improved Model with Data Augmentation:
-- **Accuracy**: 94.00% (after implementing data augmentation techniques and HOG feature extraction).
+  \[
+  egin{bmatrix}
+  50 & 0 \
+  0 & 50 \
+  \end{bmatrix}
+  \]
+
+### **Classification Report**:
+
+```
+              precision    recall  f1-score   support
+
+   Non-Human       1.00      1.00      1.00        50
+       Human       1.00      1.00      1.00        50
+
+    accuracy                           1.00       100
+   macro avg       1.00      1.00      1.00       100
+weighted avg       1.00      1.00      1.00       100
+```
 
 ---
 
 ## **Current Limitations**
 
-- The model shows bias toward detecting faces facing a specific direction (e.g., faces facing right are more likely to be detected, while faces looking straight or left are often missed).
-- More diverse training data with varying face orientations, lighting, and background conditions are needed to improve generalization.
+- The model achieved 100% accuracy, which could suggest **overfitting**. This means the model may not generalize well to real-world data or larger datasets. To verify this, we should test on a larger unseen dataset and consider tuning regularization parameters (C) in SVM.
 
 ---
 
 ## **Future Improvements**
 
-### **1. Additional Datasets**
-- Train the model on a larger dataset that includes more face orientations (left, right, straight), varied lighting conditions, and different backgrounds.
+### **1. Additional Unseen Data**
+- Test the model on a significantly larger dataset of unseen data to check for overfitting.
 
-### **2. Use More Complex Classifiers**
-- Consider switching to classifiers that can capture non-linear relationships:
-  - **Support Vector Machines (SVM)**
-  - **Random Forests**
-  - **Convolutional Neural Networks (CNNs)**
+### **2. Fine-Tune Hyperparameters**
+- Experiment with the C and gamma parameters in SVM to see if more generalizable models can be achieved.
 
-### **3. Data Augmentation**
-- Continue exploring more advanced data augmentation techniques.
+### **3. Use More Complex Classifiers**
+- Investigate deep learning models such as Convolutional Neural Networks (CNNs) for more complex face detection tasks.
 
-### **4. Optimize Training with Multithreading**
-- Implement multithreading and simultaneous processing during training to take advantage of available memory and improve training speed.
+### **4. Explore Data Augmentation**
+- Further explore advanced data augmentation techniques such as perspective transformations.
+
+### **5. Multithreading Optimization**
+- Continue optimizing training time by experimenting with multithreading for both data loading and model training.
 
 ---
 
 ## **Conclusion**
 
-The FaceVision project serves as a foundation for understanding face detection using machine learning. By enhancing feature extraction methods, utilizing more sophisticated classifiers, and expanding the dataset, future iterations of the project can achieve better performance.
+The FaceVision project demonstrates a solid foundation for understanding face detection using machine learning. The implementation of SVM has shown excellent results, but further steps are necessary to validate the model’s generalization and ensure robustness.
 
 ---
 
@@ -126,7 +127,7 @@ The FaceVision project serves as a foundation for understanding face detection u
 ### **1. Clone the Repository**
 
 ```bash
-git clone https://github.com/your_username/FaceVision.git
+git clone https://github.com/taylorking01/FaceVision.git
 ```
 
 ### **2. Install the Dependencies**
@@ -158,3 +159,5 @@ python evaluate_model.py
 - **Matplotlib**
 - **Joblib**
 - **Torchvision**
+
+---

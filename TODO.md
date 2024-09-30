@@ -2,37 +2,30 @@
 
 ## Current Model Limitations
 
-- **Face Detection Bias**: The model has a bias towards detecting faces facing right and struggles with faces looking straight or left.
-- **Generalization**: The model's generalization is limited due to insufficient variation in face orientations, lighting conditions, and background diversity.
+- **Potential Overfitting**: The SVM model achieved 100% accuracy on the current unseen test data, which suggests that the model might be overfitting. More unseen data should be tested.
 
 ## Completed Improvements
 
-- Implemented data augmentation techniques (rotating, flipping, scaling, brightness/contrast adjustments) to enhance model generalization.
+- Implemented SVM classifier for face detection.
+- Achieved 100% accuracy on unseen test data.
 
 ## Planned Improvements
 
-### 1. Additional Training Data
-- Train the model on a more diverse dataset with varied face orientations, lighting, and backgrounds.
+### 1. Additional Testing with Unseen Data
+- Test the SVM model on a much larger unseen dataset to ensure that the model is not overfitting.
 
-### 2. Data Augmentation
-- Continue exploring data augmentation techniques, including advanced transformations such as:
-  - Perspective transformations
-  - Gaussian noise addition
+### 2. Fine-Tune SVM Parameters
+- Adjust the C (regularization) and gamma parameters to explore better generalization capabilities.
 
-### 3. Use More Complex Classifiers
-- Experiment with more complex models such as:
-  - Support Vector Machines (SVM)
-  - Convolutional Neural Networks (CNNs)
+### 3. Data Augmentation
+- Continue exploring data augmentation techniques, including advanced transformations such as perspective shifts and Gaussian noise.
 
-### 4. Hyperparameter Tuning
-- Perform Grid Search or Random Search to optimize the following parameters:
-  - Number of estimators in AdaBoost
-  - Learning rate
-  - Depth of decision trees
+### 4. Explore Deep Learning Models
+- Consider experimenting with CNNs for improved feature extraction and face detection performance.
 
 ### 5. Optimize Training with Multithreading
-- Implement multithreading and simultaneous processing to take advantage of available memory and computational power.
-- Investigate how to optimize memory usage during training to reduce training time without maxing out system resources.
+- Investigate further multithreading optimizations to speed up data loading and training phases.
+
 ---
 
 ## Long-Term Goals
@@ -43,3 +36,4 @@
 ### 2. Integration with Real-World Applications
 - Explore integration with real-time applications such as security systems, face recognition, etc.
 
+---
