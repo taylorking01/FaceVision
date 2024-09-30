@@ -7,7 +7,7 @@ import torchvision.transforms as transforms
 
 def main():
     # Load the trained model
-    clf = joblib.load('face_detection_model.joblib')
+    clf = joblib.load('face_detection_model_svm.joblib')
     print("Model loaded successfully.")
 
     # Define transformation to match model's input

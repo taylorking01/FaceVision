@@ -2,8 +2,6 @@ from data_loader import load_data
 from feature_extractor import extract_features
 from classifier import train_classifier
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import AdaBoostClassifier
-from sklearn.tree import DecisionTreeClassifier
 import joblib
 from datetime import datetime
 
@@ -12,7 +10,7 @@ def train_model():
     start_time = datetime.now()
     print(f"Training started at: {start_time.strftime('%H:%M:%S')}")
 
-    # Load and preprocess data (with multithreading applied in data_loader.py)
+    # Load and preprocess data
     X, y = load_data()
     print("Data loaded successfully.")
 
@@ -24,21 +22,13 @@ def train_model():
         X_features, y, test_size=0.2, random_state=42, stratify=y
     )
 
-    # Parallelize decision tree processing within AdaBoost
-    clf = AdaBoostClassifier(
-        DecisionTreeClassifier(max_depth=1, splitter="best"),  # splitter="best" supports multithreading
-        n_estimators=50,
-        algorithm="SAMME.R",
-        learning_rate=0.5
-    )
-
-    # Train the classifier
-    clf.fit(X_train, y_train)
+    # Train the SVM classifier
+    clf = train_classifier(X_train, y_train)
     print("Classifier trained successfully.")
 
     # Save the trained model
-    joblib.dump(clf, 'face_detection_model.joblib')
-    print("Model saved to face_detection_model.joblib")
+    joblib.dump(clf, 'face_detection_model_svm.joblib')
+    print("Model saved to face_detection_model_svm.joblib")
 
     # Record the end time
     end_time = datetime.now()
