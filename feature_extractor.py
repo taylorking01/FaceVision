@@ -1,3 +1,4 @@
+# feature_extractor.py
 import numpy as np
 from skimage.feature import hog
 
