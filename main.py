@@ -13,6 +13,7 @@ print("Model loaded successfully.")
 preprocess = transforms.Compose([
     transforms.ToPILImage(),
     transforms.Resize((64, 64)),
+    transforms.Grayscale(num_output_channels=1),  # Convert to grayscale
     transforms.ToTensor(),
     transforms.Normalize((0.5,), (0.5,))
 ])
@@ -33,9 +34,15 @@ def main():
             print("Error: Failed to capture image.")
             break
 
+        # Convert the frame to grayscale and preprocess
+        # Convert BGR (OpenCV default) to RGB
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
         # Preprocess the frame
-        img_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-        img_tensor = preprocess(img_rgb).unsqueeze(0)  # Add batch dimension
+        img_tensor = preprocess(frame_rgb).unsqueeze(0)  # Add batch dimension
+
+        # Optionally, print the shape of the input tensor
+        # print(f"Input tensor shape: {img_tensor.shape}")
 
         # Predict using the trained model
         with torch.no_grad():
