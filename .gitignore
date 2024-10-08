@@ -2,10 +2,6 @@
 data/cifar-100-python/*
 data/test_32x32.mat
 
-# Ignore model files
-*.joblib
-*.h5
-*.ckpt
 
 # Ignore other large or temporary files
 *.log
